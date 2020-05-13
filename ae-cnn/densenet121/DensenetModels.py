@@ -84,11 +84,19 @@ class AECNN0(nn.Module):
 
         self.classCount = classCount
         # self.y2 = torch.Tensor(bs, 3, h, w).cuda()
-        self.normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        #self.normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        
+        self.transCrop=224
+        transformList = []
+        transformList.append(transforms.ToPILImage())
+        transformList.append(transforms.RandomCrop(self.transCrop))
+        transformList.append(transforms.ToTensor())
+        transformList.append(transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))
+        self.transformSequence=transforms.Compose(transformList)
 
-        self.encoder = nn.Sequential(
+        self.encoder = nn.Sequential( # 896 --> encode --> 224 || 1024 --> encode --> 256
             #1x896x896
-            nn.Conv2d(in_channels = 1, out_channels = 32, kernel_size = 5, stride = 4, padding = 2),
+            nn.Conv2d(in_channels = 3, out_channels = 32, kernel_size = 5, stride = 4, padding = 2),
             nn.ELU(),
             #1X224X224
             nn.Conv2d(in_channels=32, out_channels=1, kernel_size=1, stride=1, padding=0),
@@ -115,16 +123,14 @@ class AECNN0(nn.Module):
         z1 = Relu1.apply(z1)
         
         bs, c, h, w = y.shape
-        y2 = torch.Tensor(bs, 3, h, w).cuda()
+        y2 = torch.Tensor(bs, 3, self.transCrop, self.transCrop).cuda()
         
         for img_no in range(bs):
-            y2[img_no] = y[img_no]
-            y2[img_no] = self.normalize(y2[img_no]) #broadcasting 1 channel to 3 channels
-
+            y2[img_no] = self.transformSequence(torch.cat((y[img_no].cpu(), y[img_no].cpu(), y[img_no].cpu()), 0)) #broadcasting 1 channel to 3 channels
+            #y2[img_no] = self.transformSequence(y[img_no].cpu(), 0) #broadcasting 1 channel to 3 channels
         z2 = self.classifier(y2)
 
         return z1, z2
-
 
 
 class Relu1(Function):

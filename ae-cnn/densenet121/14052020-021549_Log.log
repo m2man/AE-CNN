@@ -1,0 +1,7 @@
+===== 14052020-021549 =====
+Epoch: 1 - Train Loss: 0.6434502939496582
+Epoch: 2 - Train Loss: 0.6228023098346607
+Epoch: 3 - Train Loss: 0.5420398558712083
+Epoch: 4 - Train Loss: 0.5324809631910608
+Epoch: 5 - Train Loss: 0.5258715007009187
+[Evaluate] Epoch: 5 - [SAVE] - Val Loss: 0.5334056154977578 - Val AUROC: 0.7525778188888602

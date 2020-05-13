@@ -6,10 +6,8 @@ import torch
 
 import torch.backends.cudnn as cudnn
 cudnn.benchmark = True
-#os.environ["CUDA_VISIBLE_DEVICES"]="0"
-# os.environ["CUDA_VISIBLE_DEVICES"]="1,2"
 
-from ChexnetTrainer import ChexnetTrainer
+from ChexnetTrainer_Binary import ChexnetTrainer
 
 
 
@@ -23,67 +21,42 @@ def main ():
 #--------------------------------------------------------------------------------   
 
 def runTrain():
-
-    print(torch.cuda.is_available())
-    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-    print("\nDevice:", device)
-    
-    RESNET18 = 'RES-NET-18'
-    RESNET34 = 'RES-NET-34'
-    RESNET50 = 'RES-NET-50'
-    RESNET101 = 'RES-NET-101'
-    RESNET152 = 'RES-NET-152'    
-    
-    DENSENET121 = 'DENSE-NET-121'
-    DENSENET161 = 'DENSE-NET-161'
-    DENSENET169 = 'DENSE-NET-169'
-    DENSENET201 = 'DENSE-NET-201'
-
-    INCEPTIONV3 = 'INCEPTION-V3'
     
     timestampTime = time.strftime("%H%M%S")
     timestampDate = time.strftime("%d%m%Y")
     timestampLaunch = timestampDate + '-' + timestampTime
     
     #---- Path to the directory with images
-    parentPath = '/home/histosr/ChestX'
-    #parentPath = '/home/siplab-15/ChestX'
-    pathDirData = parentPath+'/database_new/train_set'
-    pathDirDataTest = parentPath+'/database_new/test_set'
     
     #---- Paths to the files with training, validation and testing sets.
     #---- Each file should contains pairs [path to image, output vector]
     #---- Example: images_011/00027736_001.png 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-    pathFileTrain = parentPath+'/database_new/train_only_14.txt'
-    pathFileVal = parentPath+'/database_new/val_only_14.txt'
-    pathFileTest = parentPath+'/database_new/test_final_14.txt'
-    
+    datatxt = '/home/dxtien/dxtien_research/nmduy/chexnet/dataset/'
+    pathFileTrain = datatxt + 'binary_train.txt'
+    pathFileVal = datatxt + 'binary_validate.txt'
+    pathFileTest = datatxt + 'binary_test.txt'
+    pathDirData = '/home/dxtien/dxtien_research/COVID/CXR8/'
+
     #---- Neural network parameters: type of the network, is it pre-trained 
     #---- on imagenet, number of classes
-    nnArchitecture = 'Autoencoder-pE-pD-pd121'
     nnIsTrained = True
-    nnClassCount = 14
-    
+    nnClassCount = 1
     
     #---- Training settings: batch size, maximum number of epochs
-    #trainSize = 76524
-    trBatchSize = 8
-    trMaxEpoch = 15
+    trBatchSize = 16
+    trMaxEpoch = 50
     
     #---- Parameters related to image transforms: size of the down-scaled image, cropped image
-    transResize = 256
-
-    transCrop = 896
-    threshold = torch.Tensor([0.5])
-    threshold = threshold.cuda()
+    transResize = 224
+    transCrop = 1024 #896
     
 
     # ----- pathModel - path to the AE-CNN model which is to be tested 
     # -----checkpoint1 - is like a dummy. If not none then it loads encoder and decoder from encoder.pth and decoder.pth seperately into AE-CNN encoder and decoder
     # -----checkpoint2 - if not none, loads the classifier of AE-CNN from pretrained classifier on ChestX-Ray14 dataset
     # -----checkpoint3 - if not none, loads the full AE-CNN weights for resuming the training from a saved instance
-    pathModel = 'm-Autoencoder-pE-pD-pd121-epoch-15-auc-0.843020353288727-16072018-233246.pth.tar'
-
+    #pathModel = 'm-Autoencoder-pE-pD-pd121-epoch-15-auc-0.843020353288727-16072018-233246.pth.tar'
+    pathModel = 'DENSENET121-' + timestampLaunch + '.pth.tar'
     #checkpoint1 = 'm-Autoencoder-epoch-17-loss-0.00026260194169445625-15072018-133705.pth.tar'
     checkpoint1 = None
     #checkpoint2 = 'm-DENSE-NET-121-epoch-6-auc-0.8391076085811494-15072018-184230.pth.tar'
@@ -91,9 +64,8 @@ def runTrain():
     #checkpoint3 = 'm-Autoencoder-pE-pD-pd121-epoch-14-auc-0.8429981074471875-16072018-233246.pth.tar'
     checkpoint3 = None
 
-    print ('Training NN architecture = ', nnArchitecture)
-    pathModel = ChexnetTrainer.train(parentPath, pathDirData, pathFileTrain, pathFileVal, nnArchitecture, nnIsTrained, nnClassCount, trBatchSize, trMaxEpoch, transResize, transCrop, timestampLaunch, threshold, device, checkpoint1, checkpoint2, checkpoint3)
-    print("Path Model: "+str(pathModel))
+    print ('Training DENSENET121')
+    ChexnetTrainer.train(pathDirData, pathFileTrain, pathFileVal, nnClassCount, trBatchSize, trMaxEpoch, timestampLaunch)
 
     # -----ChexnetTrainer.store() - function to store the output of encoder of AE-CNN. This can be used for visualisation of latent code produced by encoder
     # ChexnetTrainer.store(parentPath, pathModel, nnArchitecture, nnClassCount, trBatchSize, device)

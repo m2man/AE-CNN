@@ -72,7 +72,7 @@ class ChexnetTrainer ():
     #----TRANFORMATION FUNCTION
 
     #takes 256x256 and returns 224x224 (cropping)
-    def trans_train(x, nnArchitecture, transCrop):
+    def trans_train(self, x, nnArchitecture, transCrop):
         
         # if nnArchitecture != 'INCEPTION-V3':
         #     normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -101,7 +101,7 @@ class ChexnetTrainer ():
         return y
 
     #takes 224x224/299x299 and returns 224x224/299x299 (simple testing)
-    def trans_val(x, nnArchitecture):
+    def trans_val(self, x, nnArchitecture):
 
         # if nnArchitecture != 'INCEPTION-V3':
         #     normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -124,7 +124,7 @@ class ChexnetTrainer ():
         return y
 
 
-    def trans_test(x, nnArchitecture, transCrop):
+    def trans_test(self, x, nnArchitecture, transCrop):
 
         # if nnArchitecture != 'INCEPTION-V3':
         #     normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -149,7 +149,7 @@ class ChexnetTrainer ():
 
 
     # -----ChexnetTrainer.store() - function to store the output of encoder of AE-CNN. This can be used for visualisation of latent code produced by encoder
-    def store(parentPath, pathModel, nnArchitecture, nnClassCount, trBatchSize, device):
+    def store(self, parentPath, pathModel, nnArchitecture, nnClassCount, trBatchSize, device):
 
         model = AECNN0(nnClassCount)
         model.to(device)
@@ -228,7 +228,7 @@ class ChexnetTrainer ():
 
 
     
-    def train (parentPath, pathDirData, pathFileTrain, pathFileVal, nnArchitecture, nnIsTrained, nnClassCount, trBatchSize, trMaxEpoch, transResize, transCrop, launchTimestamp, threshold , device, checkpoint1, checkpoint2, checkpoint3):
+    def train (self, parentPath, pathDirData, pathFileTrain, pathFileVal, nnArchitecture, nnIsTrained, nnClassCount, trBatchSize, trMaxEpoch, transResize, transCrop, launchTimestamp, threshold , device, checkpoint1, checkpoint2, checkpoint3):
 
         print("Inside train function:")
     
@@ -248,7 +248,7 @@ class ChexnetTrainer ():
 
         #-------------------- SETTINGS: OPTIMIZER & SCHEDULER
         optimizer = optim.Adam(model.parameters(), lr=1e-4, betas=(0.9, 0.999), eps=1e-08, weight_decay=1e-5)
-        # scheduler = ReduceLROnPlateau(optimizer, factor = 0.5, patience = 2, mode = 'min')
+        scheduler = ReduceLROnPlateau(optimizer, factor = 0.2, patience = 2, mode = 'min', verbose=True)
                 
         
 
@@ -417,7 +417,7 @@ class ChexnetTrainer ():
         
 
     #--------------------------------------------------CUSTOM TRAINING WITH CUSTOM LOSS
-    def trainEpoch(model, nnArchitecture, datasetTrain, dataLoader, optimizer, trBatchSize, transCrop, classCount, threshold, epochID, launchTimestamp, device):
+    def trainEpoch(self, model, nnArchitecture, datasetTrain, dataLoader, optimizer, trBatchSize, transCrop, classCount, threshold, epochID, launchTimestamp, device):
 
         #model.train()
         # t=now()
@@ -581,7 +581,7 @@ class ChexnetTrainer ():
 
 
     # ----- function to compute AUROC, AUPRC, AP
-    def computeAUROC (dataGT, dataPRED, classCount):
+    def computeAUROC (self, dataGT, dataPRED, classCount):
 
 
         outAUROC = []
@@ -602,7 +602,7 @@ class ChexnetTrainer ():
     
 
 
-    def val (parentPath, datasetVal, dataLoader, model, pathModel, nnArchitecture, nnClassCount, nnIsTrained, trBatchSize, transResize, transCrop, launchTimestamp, threshold, device):   
+    def val (self, parentPath, datasetVal, dataLoader, model, pathModel, nnArchitecture, nnClassCount, nnIsTrained, trBatchSize, transResize, transCrop, launchTimestamp, threshold, device):   
             
             # print("\n\n\n")
             print("\nInside val funtion")
@@ -825,7 +825,7 @@ class ChexnetTrainer ():
     #---- launchTimestamp - date/time, used to assign unique name for the checkpoint file
     #---- checkpoint - if not None loads the model and continues training
     
-    def test (parentPath, model, pathModel, pathDirDataTest, pathFileTest, nnArchitecture, nnClassCount, nnIsTrained, trBatchSize, transResize, transCrop, launchTimestamp, threshold, device):   
+    def test (self, parentPath, model, pathModel, pathDirDataTest, pathFileTest, nnArchitecture, nnClassCount, nnIsTrained, trBatchSize, transResize, transCrop, launchTimestamp, threshold, device):   
         
         #---TRANSFORMATION
         transformList = []
